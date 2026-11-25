@@ -15,6 +15,13 @@ OUTPUT_PATH = os.environ.get("MAKEFUN_OUTPUT", "/output/entry.txt")
 def main() -> None:
     assert 1 <= len(LINE) <= 140, f"line is {len(LINE)} chars, must be 1-140"
     assert LINE.strip(), "line must not be only whitespace"
+    # Single-line contract: the entry is one line of advice, so any embedded
+    # newline would silently break the format for the judge/reader. Fail
+    # loudly instead of writing a multi-line file.
+    assert "\n" not in LINE and "\r" not in LINE, "line must contain no newline characters"
+    # UTF-8 encodability: the file is written as UTF-8, so prove the line
+    # (which contains an em dash) encodes cleanly before writing anything.
+    LINE.encode("utf-8")
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8", newline="\n") as f:
         f.write(LINE)
